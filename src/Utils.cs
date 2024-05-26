@@ -87,15 +87,9 @@ namespace FakeAchievements
 
             Texture2D texture = LoadTexture(filePath);
 
-            Plugin.Log("Creating achievement atlas");
-
             FAtlas atlas = new FAtlas(name, texture, FAtlasManager._nextAtlasIndex++, false); new FAtlas(name, texture, FAtlasManager._nextAtlasIndex++, false);
 
-            Plugin.Log("Adding achievement atlas");
-
             atlasManager.AddAtlas(atlas);
-
-            Plugin.Log("Added achievement atlas");
 
             return atlas;
         }
