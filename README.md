@@ -15,6 +15,7 @@ To create an achievement follow the following steps :
 - Use `FakeAchievementManager.ShowAchievement("your_achievement_id")` in your mod code to display the achievement
 
 ## Examples
+The full code of the examples below can be found on the [example mod repository](https://github.com/ddemile/FakeAchievementsExample?tab=readme-ov-file)
 ### Example plugin that triggers an achievemnt when the player dies
 ```cs
 using FakeAchievements;
@@ -58,5 +59,5 @@ namespace YourModNamespace
 
 ## Reloading achievements
 If you want to reload the achievements at any time you can use:
-- The `achievement reload` command in the DevConsole mod console
+- The `achievements reload` command in the DevConsole mod console
 - `FakeAchievementManager.LoadAchievements()`
