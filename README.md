@@ -12,7 +12,7 @@ To create an achievement follow the following steps :
 
 ## Displaying achievemnents
 - Use achievements grant command in the DevConsole mod console (for debbuging)
-- Use `FakeAchievementManager.ShowAchievement("your_achievement_id")` in your mod code to display the achievement.
+- Use `FakeAchievementManager.ShowAchievement("your_achievement_id")` in your mod code to display the achievement
 
 ## Examples
 ### Example plugin that triggers an achievemnt when the player dies
