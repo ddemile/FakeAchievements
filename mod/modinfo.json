@@ -1,0 +1,10 @@
+﻿{
+	"id": "ddemile.fake_achievements",
+	"name": "Fake Achievements",
+	"version": "0.1.0",
+	"authors": "ddemile",
+	"description": "A mod to display steam-like achievements.",
+	"requirements": [ ],
+	"requirements_names": [ ],
+	"tags": [ "Dependency", "Tools" ]
+}

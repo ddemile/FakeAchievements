@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <PropertyGroup>
+        <TargetFramework>net48</TargetFramework>
+        <LangVersion>11</LangVersion>
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Reference Include="../lib/*.dll">
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+    
+    <Target Name="GenerateMod" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<RemovePlugins Include="../mod/plugins/*.dll" />
+		</ItemGroup>
+		<ItemGroup>
+            <!-- Inclure les fichiers DLL -->
+            <CopyPlugins Include="$(TargetPath)" />
+            <!-- Inclure les fichiers PDB -->
+            <CopyPdbs Include="$(TargetDir)*.pdb" />
+		</ItemGroup>
+		
+        <Delete Files="@(RemovePlugins)" />
+        <!-- Copier à la fois les DLL et les PDB -->
+        <Copy SourceFiles="@(CopyPlugins)" DestinationFolder="../mod/newest/plugins/" />
+        <Copy SourceFiles="@(CopyPdbs)" DestinationFolder="../mod/newest/plugins/" />
+    </Target>
+    
+</Project>
