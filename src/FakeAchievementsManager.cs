@@ -129,7 +129,7 @@ namespace FakeAchievements
             {
                 this.container.y -= speedFactor;
             }
-            else if (shownTime >= 300)
+            else if (shownTime >= 1000)
             {
                 this.state = State.Disappearing;
             }
@@ -150,6 +150,7 @@ namespace FakeAchievements
             {
                 this.container.y = -69;
                 this.state = State.Hidden;
+                instances.Remove(this);
             }
 
             this.pages[0].GrafUpdate(timeStacker);
@@ -165,9 +166,11 @@ namespace FakeAchievements
 
             if (achievement == null) throw new Exception($"Achievement not found : {achievementResolvable}");
 
-            instance = new FakeAchievementManager(Plugin.RW.processManager, achievement);
+            instances.Add(
+                new FakeAchievementManager(Plugin.RW.processManager, achievement)
+            );
         }
 
-        public static FakeAchievementManager instance;
+        public static List<FakeAchievementManager> instances = new();
     }
 }

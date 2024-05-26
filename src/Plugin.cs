@@ -32,8 +32,14 @@ namespace FakeAchievements
 
             // Put your custom hooks here!
             Hooks.Hooks.Register();
+            On.Player.Die += Player_Die;
         }
-        
+
+        private void Player_Die(On.Player.orig_Die orig, Player self)
+        {
+            throw new System.NotImplementedException();
+        }
+
         // Load any resources, such as sprites or sounds
         private void LoadResources(RainWorld rainWorld)
         {
