@@ -4,7 +4,7 @@ FakeAchievements is a Rain World helper that allows you to create fake steam-lik
 ## Creating achievements 
 To create an achievement follow the following steps :
 1. Install the FakeAchievements mod
-2. Download and add the [stripped dll](TODO: put release link) to your project libs and your mod dependencies
+2. Download and add the [stripped dll](https://github.com/ddemile/FakeAchievements/releases/download/0.1.0-beta/Stripped-FakeAchievements.dll) to your project libs and add the mod in your mod dependencies
 3. Create an `achievements` folder in your mod root
 4. Create a new folder in that folder named after you achievement id
 5. Add a file `image.png` named in the folder (this will be your achievement icon)
@@ -12,9 +12,10 @@ To create an achievement follow the following steps :
 
 ## Displaying achievemnents
 - Use achievements grant command in the DevConsole mod console (for debbuging)
-- Use `FakeAchievementManager.ShowAchievement("your_achievement_id")` in your mod code to display the achievement.
+- Use `FakeAchievementManager.ShowAchievement("your_achievement_id")` in your mod code to display the achievement
 
 ## Examples
+The full code of the examples below can be found on the [example mod repository](https://github.com/ddemile/FakeAchievementsExample?tab=readme-ov-file)
 ### Example plugin that triggers an achievemnt when the player dies
 ```cs
 using FakeAchievements;
@@ -58,5 +59,5 @@ namespace YourModNamespace
 
 ## Reloading achievements
 If you want to reload the achievements at any time you can use:
-- The `achievement reload` command in the DevConsole mod console
+- The `achievements reload` command in the DevConsole mod console
 - `FakeAchievementManager.LoadAchievements()`
