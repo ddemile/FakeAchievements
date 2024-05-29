@@ -31,11 +31,6 @@ namespace FakeAchievements
 
         public static List<Achievement> achievements;
 
-        public static Dictionary<string, object> ToDictionnary(object arg)
-        {
-            return arg.GetType().GetProperties().ToDictionary(property => property.Name, property => property.GetValue(arg));
-        }
-
         public static void LoadAchievements()
         {
             Plugin.Log("Loading achievements");
@@ -153,18 +148,17 @@ namespace FakeAchievements
                 instances.Remove(this);
             }
 
+            this.container.MoveToFront();
             this.pages[0].GrafUpdate(timeStacker);
         }
 
         public static void ShowAchievement(string achievementResolvable)
         {
-            Plugin.Log("Show achievement");
-            Plugin.Log(achievementResolvable);
-            achievements.ForEach(achievement => Plugin.Log($"{achievement.modId}/{achievement.id}"));
-
             Achievement achievement = achievements.Find(achievement => $"{achievement.modId}/{achievement.id}" == achievementResolvable || achievement.id == achievementResolvable);
-
+            
             if (achievement == null) throw new Exception($"Achievement not found : {achievementResolvable}");
+
+            Plugin.Log($"Displaying achievement: {achievement.modId}/{achievement.id}");
 
             instances.Add(
                 new FakeAchievementManager(Plugin.RW.processManager, achievement)
