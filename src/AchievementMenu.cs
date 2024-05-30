@@ -10,8 +10,11 @@ using UnityEngine;
 
 namespace FakeAchievements
 {
-    public class FakeAchievementManager : Menu.Menu
+    public class AchievementMenu : Menu.Menu
     {
+        public MenuLabel achievementTitle;
+        public MenuLabel achievementSubTitle;
+
         public State state = State.Appearing;
 
         public const float speedFactor = 1.5f;
@@ -26,44 +29,7 @@ namespace FakeAchievements
             Hidden
         }
 
-        public MenuLabel achievementTitle;
-        public MenuLabel achievementSubTitle;
-
-        public static List<Achievement> achievements;
-
-        public static void LoadAchievements()
-        {
-            Plugin.Log("Loading achievements");
-
-            List<ModManager.Mod> mods = (from mod in ModManager.InstalledMods where mod.enabled select mod).ToList();
-
-            achievements = new List<Achievement>();
-
-            foreach (ModManager.Mod mod in mods)
-            {
-                string achievementsPath = Path.Combine(mod.path, "achievements");
-                if (!Directory.Exists(achievementsPath)) continue;
-
-                string[] directories = Directory.GetDirectories(achievementsPath);
-
-                foreach (string directory in directories)
-                {
-                    string achievementId = new DirectoryInfo(directory).Name;
-                    string achievementPath = Path.Combine(achievementsPath, achievementId);
-
-                    Plugin.Log("Found achievement: " + achievementId + " | " + achievementPath);
-
-                    string infoFile = Path.Combine(achievementPath, "info.json");
-                    var localizations = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(File.ReadAllText(infoFile));
-
-                    Achievement achievement = new Achievement(achievementId, mod.id, localizations);
-
-                    achievements.Add(achievement);
-                }
-            }
-        }
-
-        public FakeAchievementManager(ProcessManager manager, Achievement achievement) : base(manager, new ProcessManager.ProcessID("FakeAchievementMenu", true))
+        public AchievementMenu(ProcessManager manager, Achievement achievement) : base(manager, new ProcessManager.ProcessID("FakeAchievementMenu", true))
         {
             pages.Add(new Page(this, null, "main", 0));
             PlaySound(Sounds.STEAM_ACHIEVEMENT);
@@ -145,26 +111,11 @@ namespace FakeAchievements
             {
                 this.container.y = -69;
                 this.state = State.Hidden;
-                instances.Remove(this);
+                AchievementsManager.menuInstances.Remove(this);
             }
 
             this.container.MoveToFront();
             this.pages[0].GrafUpdate(timeStacker);
         }
-
-        public static void ShowAchievement(string achievementResolvable)
-        {
-            Achievement achievement = achievements.Find(achievement => $"{achievement.modId}/{achievement.id}" == achievementResolvable || achievement.id == achievementResolvable);
-            
-            if (achievement == null) throw new Exception($"Achievement not found : {achievementResolvable}");
-
-            Plugin.Log($"Displaying achievement: {achievement.modId}/{achievement.id}");
-
-            instances.Add(
-                new FakeAchievementManager(Plugin.RW.processManager, achievement)
-            );
-        }
-
-        public static List<FakeAchievementManager> instances = new();
     }
 }

@@ -37,7 +37,7 @@ namespace FakeAchievements
                     {
                         if (x[0] == "grant")
                         {
-                            return FakeAchievementManager.achievements.ConvertAll(achievement => $"{achievement.modId}/{achievement.id}");
+                            return AchievementsManager.achievements.ConvertAll(achievement => $"{achievement.modId}/{achievement.id}");
                         } 
                     }
                     return new string[0];
@@ -56,10 +56,10 @@ namespace FakeAchievements
 
             if (args[0] == "reload")
             {
-                FakeAchievementManager.LoadAchievements();
+                AchievementsManager.LoadAchievements();
             } else if (args[0] == "grant")
             {
-                FakeAchievementManager.ShowAchievement(args[1]);
+                AchievementsManager.ShowAchievement(args[1]);
             }
         }
 

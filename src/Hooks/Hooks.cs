@@ -16,7 +16,7 @@ namespace FakeAchievements.Hooks
         private static void MainLoopProcess_GrafUpdate(On.MainLoopProcess.orig_GrafUpdate orig, MainLoopProcess self, float timeStacker)
         {
             orig(self, timeStacker);
-            foreach (FakeAchievementManager instance in FakeAchievementManager.instances)
+            foreach (AchievementMenu instance in AchievementsManager.menuInstances)
             {
                 instance.GrafUpdate(timeStacker);
             }

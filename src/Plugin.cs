@@ -40,7 +40,7 @@ namespace FakeAchievements
             Futile.atlasManager.LoadImage("illustrations/achievement_background");
 
             Sounds.Initialize();
-            FakeAchievementManager.LoadAchievements();
+            AchievementsManager.LoadAchievements();
         }
     }
 }
