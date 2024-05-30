@@ -60,4 +60,4 @@ namespace YourModNamespace
 ## Reloading achievements
 If you want to reload the achievements at any time you can use:
 - The `achievements reload` command in the DevConsole mod console
-- `AchievementManager.LoadAchievements()`
+- `AchievementsManager.LoadAchievements()`
