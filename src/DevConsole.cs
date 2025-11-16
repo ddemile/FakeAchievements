@@ -12,7 +12,7 @@ namespace FakeAchievements
 {
     internal static class MyDevConsole
     {
-        public static ManualLogSource logSource = BepInEx.Logging.Logger.CreateLogSource("SilkSlug:ConsoleWrite");
+        public static ManualLogSource logSource = BepInEx.Logging.Logger.CreateLogSource("FakeAchievements:ConsoleWrite");
         public static RainWorld RW => UnityEngine.Object.FindObjectOfType<RainWorld>();
 
         // Register Commands

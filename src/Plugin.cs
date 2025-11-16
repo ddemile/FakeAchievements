@@ -26,9 +26,8 @@ namespace FakeAchievements
         // Add hooks
         public void OnEnable()
         {
-            try { RegisterCommands(); } catch { }
-
             On.RainWorld.OnModsInit += Extras.WrapInit(LoadResources);
+            On.RainWorld.PostModsInit += OnPostModsInit;
 
             // Put your custom hooks here!
             Hooks.Hooks.Register();
@@ -41,6 +40,12 @@ namespace FakeAchievements
 
             Sounds.Initialize();
             AchievementsManager.LoadAchievements();
+        }
+
+        private void OnPostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)
+        {
+            orig(self);
+            try { RegisterCommands(); } catch { }
         }
     }
 }

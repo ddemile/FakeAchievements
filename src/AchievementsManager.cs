@@ -54,9 +54,7 @@ namespace FakeAchievements
 
         public static void ShowAchievement(string achievementResolvable)
         {
-            Achievement achievement = ResolveAchievement(achievementResolvable);
-            
-            if (achievement == null) throw new Exception($"Achievement not found : {achievementResolvable}");
+            Achievement achievement = ResolveAchievement(achievementResolvable) ?? throw new Exception($"Achievement not found : {achievementResolvable}");
 
             Plugin.Log($"Displaying achievement: {achievement.modId}/{achievement.id}");
 

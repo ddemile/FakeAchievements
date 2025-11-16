@@ -1,32 +1,49 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
+
     <PropertyGroup>
-        <TargetFramework>net48</TargetFramework>
-        <LangVersion>11</LangVersion>
+        <TargetFramework>net481</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <OutputPath>../mod/newest/plugins</OutputPath>
+        <PathMap>$(MSBuildProjectDirectory)=/$(SolutionName)</PathMap>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <DebugType>portable</DebugType>
     </PropertyGroup>
-    
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
+
     <ItemGroup>
         <Reference Include="../lib/*.dll">
             <Private>false</Private>
         </Reference>
+
+        <Reference Include="..\lib\RainWorldManaged\Assembly-CSharp.dll" Publicize="true">
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="..\lib\RainWorldManaged\Unity*.dll" Publicize="true">
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="..\lib\RainWorldManaged\Mono*.dll" Publicize="true">
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
-    
-    <Target Name="GenerateMod" AfterTargets="PostBuildEvent">
-		<ItemGroup>
-			<RemovePlugins Include="../mod/plugins/*.dll" />
-		</ItemGroup>
-		<ItemGroup>
-            <!-- Inclure les fichiers DLL -->
-            <CopyPlugins Include="$(TargetPath)" />
-            <!-- Inclure les fichiers PDB -->
-            <CopyPdbs Include="$(TargetDir)*.pdb" />
-		</ItemGroup>
-		
-        <Delete Files="@(RemovePlugins)" />
-        <!-- Copier à la fois les DLL et les PDB -->
-        <Copy SourceFiles="@(CopyPlugins)" DestinationFolder="../mod/newest/plugins/" />
-        <Copy SourceFiles="@(CopyPdbs)" DestinationFolder="../mod/newest/plugins/" />
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <Target Name="GenerateMod" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <!-- Release generation action, if you don't want pdbs to be generated, make the DebugType
+        of the Release Group none and remove them here with "../mod/newest/plugins/*.pdb" -->
     </Target>
-    
+
 </Project>
