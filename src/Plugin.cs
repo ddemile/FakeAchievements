@@ -4,7 +4,7 @@ using BepInEx.Logging;
 
 namespace FakeAchievements
 {
-    [BepInPlugin(MOD_ID, "Fake Achievements", "0.1.2")]
+    [BepInPlugin(MOD_ID, "Fake Achievements", "0.1.3")]
     class Plugin : BaseUnityPlugin
     {
         private const string MOD_ID = "ddemile.fake_achievements";
