@@ -4,13 +4,14 @@ using BepInEx.Logging;
 
 namespace FakeAchievements
 {
-    [BepInPlugin(MOD_ID, "Fake Achievements", "0.1.3")]
-    class Plugin : BaseUnityPlugin
+    [BepInPlugin(MOD_ID, "Fake Achievements", MOD_VERSION)]
+    public class Plugin : BaseUnityPlugin
     {
-        private const string MOD_ID = "ddemile.fake_achievements";
+        internal const string MOD_ID = "ddemile.fake_achievements";
+        internal const string MOD_VERSION = "0.1.3";
 
         public static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource("FakeAchievements");
-        
+
         public static RainWorld RW => FindObjectOfType<RainWorld>();
 
         public static void Log(object msg)
@@ -33,6 +34,11 @@ namespace FakeAchievements
             Hooks.Hooks.Register();
         }
 
+        public void OnDisable()
+        {
+            AchievementsTracker.SaveUnlockedAchievements();
+        }
+
         // Load any resources, such as sprites or sounds
         private void LoadResources(RainWorld rainWorld)
         {
@@ -40,6 +46,8 @@ namespace FakeAchievements
 
             Sounds.Initialize();
             AchievementsManager.LoadAchievements();
+
+            AchievementsTracker.LoadUnlockedAchievements();
         }
 
         private void OnPostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)

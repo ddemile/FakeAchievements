@@ -1,11 +1,6 @@
 ﻿using BepInEx.Logging;
 using DevConsole.Commands;
 using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace FakeAchievements
@@ -31,14 +26,18 @@ namespace FakeAchievements
                 {
                     if (x.Length == 0)
                     {
-                        return new string[] { "reload", "grant" };
+                        return new string[] { "reload", "grant", "revoke" };
                     }
                     if (x.Length == 1)
                     {
                         if (x[0] == "grant")
                         {
                             return AchievementsManager.achievements.ConvertAll(achievement => $"{achievement.modId}/{achievement.id}");
-                        } 
+                        }
+                        else if (x[0] == "revoke")
+                        {
+                            return AchievementsTracker.UnlockedAchievements;
+                        }
                     }
                     return new string[0];
                 })
@@ -54,12 +53,19 @@ namespace FakeAchievements
                 return;
             }
 
-            if (args[0] == "reload")
+            switch (args[0])
             {
-                AchievementsManager.LoadAchievements();
-            } else if (args[0] == "grant")
-            {
-                AchievementsManager.ShowAchievement(args[1]);
+                case "reload":
+                    AchievementsManager.LoadAchievements();
+                    break;
+                case "grant":
+                    AchievementsManager.ShowAchievement(args[1]);
+                    break;
+                case "revoke":
+                    AchievementsTracker.LockAchievement(args[1]);
+                    break;
+                default:
+                    break;
             }
         }
 

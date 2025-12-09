@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace FakeAchievements
 {
@@ -56,11 +55,16 @@ namespace FakeAchievements
         {
             Achievement achievement = ResolveAchievement(achievementResolvable) ?? throw new Exception($"Achievement not found : {achievementResolvable}");
 
-            Plugin.Log($"Displaying achievement: {achievement.modId}/{achievement.id}");
+            string achievementId = $"{achievement.modId}/{achievement.id}";
 
-            menuInstances.Add(
-                new AchievementMenu(Plugin.RW.processManager, achievement)
-            );
+            if (AchievementsTracker.UnlockAchievement(achievementId))
+            {
+                Plugin.Log($"Displaying achievement: {achievementId}");
+
+                menuInstances.Add(
+                    new AchievementMenu(Plugin.RW.processManager, achievement)
+                );
+            }
         }
 
         public static List<AchievementMenu> menuInstances = new();
