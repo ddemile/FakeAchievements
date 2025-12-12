@@ -26,9 +26,9 @@ namespace FakeAchievements
                 {
                     if (x.Length == 0)
                     {
-                        return new string[] { "reload", "grant", "revoke" };
+                        return ["reload", "grant", "revoke"];
                     }
-                    if (x.Length == 1)
+                    else if (x.Length == 1)
                     {
                         if (x[0] == "grant")
                         {
@@ -39,7 +39,14 @@ namespace FakeAchievements
                             return AchievementsTracker.UnlockedAchievements;
                         }
                     }
-                    return new string[0];
+                    else if (x.Length == 2)
+                    { 
+                        if (x[0] == "grant")
+                        {
+                            return ["help-cosmecticOnly: Boolean = False", "True", "False"];
+                        }
+                    }
+                    return [];
                 })
                 .Register();
         }
@@ -59,10 +66,12 @@ namespace FakeAchievements
                     AchievementsManager.LoadAchievements();
                     break;
                 case "grant":
-                    AchievementsManager.ShowAchievement(args[1]);
+                    string cosmeticOnlyArg = (args.Length > 2 ? args[2] : null);
+                    bool cosmecticOnly = cosmeticOnlyArg?.ToLower() == "true";
+                    AchievementsManager.GrantAchievement(args[1], cosmecticOnly);
                     break;
                 case "revoke":
-                    AchievementsTracker.LockAchievement(args[1]);
+                    AchievementsManager.RevokeAchievement(args[1]);
                     break;
                 default:
                     break;

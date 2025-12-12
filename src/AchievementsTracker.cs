@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text;
 using UnityEngine;
 
 namespace FakeAchievements
@@ -102,15 +101,17 @@ namespace FakeAchievements
 
             try
             {
+                _unlockedAchievements.Clear();
+
                 string[] rawData = File.ReadAllText(PathToUnlocksFile).Split(';');
 
                 // As of right now, the version can be ignored. What we actually need is the list of IDs that come afterwards.
 
-                if (rawData.Length < 2) return;
+                if (rawData.Length < 2) throw new Exception("Corrupted file");
 
                 _unlockedAchievements.AddRange(rawData[1].Split(','));
 
-                Plugin.Log($"Loaded {rawData.Length - 1} unlocked achievement(s).");
+                Plugin.Log($"Loaded {_unlockedAchievements.Count} unlocked achievement(s).");
             }
             catch (Exception ex)
             {
@@ -124,14 +125,7 @@ namespace FakeAchievements
         /// </summary>
         internal static void SaveUnlockedAchievements()
         {
-            StringBuilder builder = new();
-
-            foreach (string achievementID in _unlockedAchievements)
-            {
-                builder.Append($"{achievementID},");
-            }
-
-            string rawData = $"v{Plugin.MOD_VERSION};{builder.ToString().TrimEnd(',')}"; // Version is stored for future-proofing, in case the API changes and we need to migrate the old file format
+            string rawData = $"v{Plugin.MOD_VERSION};{string.Join(",", _unlockedAchievements)}"; // Version is stored for future-proofing, in case the API changes and we need to migrate the old file format
 
             try
             {

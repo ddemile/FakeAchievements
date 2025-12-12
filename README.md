@@ -15,13 +15,13 @@ To create an achievement follow these steps:
 
 ## Displaying achievemnents
 
-- Use `achievements grant` command in the DevConsole mod console (for debbuging)
-- Use `AchievementsManager.ShowAchievement("your_achievement_id")` in your mod code to display the achievement
+- Use `achievements grant [cosmeticOnly: bool]` command in the DevConsole mod console (for debbuging)
+- Use `AchievementsManager.GrantAchievement("your_achievement_id", [cosmeticOnly: bool])` in your mod code to display the achievement
 
 Note achievements are by default only ever displayed once; To allow an achievement to be displayed again:
 
 - Use `achievements revoke` command in the DevConsole's mod console (for debugging)
-- Use `AchievementsTracker.LockAchievement("your_achievement_id")` in your mod's code to allow the achievement to be "unlocked" and displayed again
+- Use `AchievementsManager.RevokeAchievement("your_achievement_id")` in your mod's code to allow the achievement to be "unlocked" and displayed again
 
 ## Examples
 
@@ -47,9 +47,9 @@ namespace YourModNamespace
         {
             orig(self);
 
-            AchievementsManager.ShowAchievement("your_achievement_id");
+            AchievementsManager.GrantAchievement("your_achievement_id");
             // Or
-            AchievementsManager.ShowAchievement("your_mod_id/your_achievement_id");
+            AchievementsManager.GrantAchievement("your_mod_id/your_achievement_id");
         }
     }
 }
@@ -76,14 +76,17 @@ namespace YourModNamespace
             orig(self);
 
             // This unlocks the achievement itself
-            AchievementsManager.ShowAchievement("your_achievement_id");
+            AchievementsManager.GrantAchievement("your_achievement_id");
             // Or
-            AchievementsManager.ShowAchievement("your_mod_id/your_achievement_id");
+            AchievementsManager.GrantAchievement("your_mod_id/your_achievement_id");
+            
+            // This only displays the achievement without actually marking it as granted
+            AchievementsManager.GrantAchievement("your_mod_id/your_achievement_id", true);
 
-            // This "locks" the achievement, allowing it to be shown again
-            AchievementsTracker.LockAchievement("your_achievement_id");
+            // This "locks" / "revoke" the achievement, allowing it to be unlocked again
+            AchievementsManager.RevokeAchievement("your_achievement_id");
             // Or
-            AchievementsTracker.LockAchievement("your_mod_id/your_achievement_id");
+            AchievementsManager.RevokeAchievement("your_mod_id/your_achievement_id");
         }
     }
 }
