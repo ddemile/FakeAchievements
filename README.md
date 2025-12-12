@@ -7,7 +7,7 @@ FakeAchievements is a Rain World helper which allows the creation of custom, Ste
 To create an achievement follow these steps:
 
 1. Install the FakeAchievements mod
-2. Download and add the [stripped dll](https://github.com/ddemile/FakeAchievements/releases/download/0.1.2-beta/Stripped-FakeAchievements.dll) to your project's referenced assemblies and add the mod as a dependency of your mod
+2. Download and add the [stripped dll](https://github.com/ddemile/FakeAchievements/releases/download/0.1.4-beta/Stripped-FakeAchievements.dll) to your project's referenced assemblies and add the mod as a dependency of your mod
 3. Create an `achievements` folder in your mod root
 4. Create a new folder in that folder named after you achievement id
 5. Add a file named `image.png` in the folder (this will be your achievement icon)
