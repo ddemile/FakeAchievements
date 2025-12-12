@@ -1,6 +1,5 @@
 using System;
 using System.Security.Permissions;
-using UnityEngine;
 
 /*
  * This file contains fixes to some common problems when modding Rain World.
@@ -13,29 +12,32 @@ using UnityEngine;
 #pragma warning restore CS0618
 
 
-internal static class Extras
+namespace FakeAchievements
 {
-    private static bool _initialized;
-
-    // Ensure resources are only loaded once and that failing to load them will not break other mods
-    public static On.RainWorld.hook_OnModsInit WrapInit(Action<RainWorld> loadResources)
+    internal static class Extras
     {
-        return (orig, self) =>
-        {
-            orig(self);
+        private static bool _initialized;
 
-            try
+        // Ensure resources are only loaded once and that failing to load them will not break other mods
+        public static On.RainWorld.hook_OnModsInit WrapInit(Action<RainWorld> loadResources)
+        {
+            return (orig, self) =>
             {
-                if (!_initialized)
+                orig(self);
+
+                try
                 {
-                    _initialized = true;
-                    loadResources(self);
+                    if (!_initialized)
+                    {
+                        _initialized = true;
+                        loadResources(self);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-        };
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            };
+        }
     }
 }

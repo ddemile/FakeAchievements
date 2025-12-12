@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace FakeAchievements
 {
@@ -19,7 +18,7 @@ namespace FakeAchievements
 
             List<ModManager.Mod> mods = (from mod in ModManager.InstalledMods where mod.enabled select mod).ToList();
 
-            achievements = new List<Achievement>();
+            achievements = [];
 
             foreach (ModManager.Mod mod in mods)
             {
@@ -52,17 +51,40 @@ namespace FakeAchievements
             return achievements.Find(achievement => $"{achievement.modId}/{achievement.id}" == achievementResolvable || achievement.id == achievementResolvable);
         }
 
+        [Obsolete("This method was replaced by the new GrantAchievement method")]
         public static void ShowAchievement(string achievementResolvable)
         {
-            Achievement achievement = ResolveAchievement(achievementResolvable) ?? throw new Exception($"Achievement not found : {achievementResolvable}");
-
-            Plugin.Log($"Displaying achievement: {achievement.modId}/{achievement.id}");
-
-            menuInstances.Add(
-                new AchievementMenu(Plugin.RW.processManager, achievement)
-            );
+            GrantAchievement(achievementResolvable, true);
         }
 
-        public static List<AchievementMenu> menuInstances = new();
+        public static void GrantAchievement(string achievementResolvable, bool cosmeticOnly = false)
+        {
+            Achievement achievement = ResolveAchievement(achievementResolvable) ?? throw new Exception($"Achievement not found: {achievementResolvable}");
+
+            string achievementId = $"{achievement.modId}/{achievement.id}";
+
+            if (cosmeticOnly || AchievementsTracker.UnlockAchievement(achievementId))
+            {
+                Plugin.Log($"Displaying achievement: {achievementId}");
+
+                menuInstances.Add(
+                    new AchievementMenu(Plugin.RW.processManager, achievement)
+                );
+            }
+        }
+
+        public static void RevokeAchievement(string achievementResolvable)
+        {
+            Achievement achievement = ResolveAchievement(achievementResolvable);
+
+            string achievementId = achievement != null ? $"{achievement.modId}/{achievement.id}" : achievementResolvable;
+
+            if (!AchievementsTracker.LockAchievement(achievementId))
+            {
+                throw new Exception($"Couldn't revoke achievement: {achievementId}");
+            }
+        }
+
+        public static List<AchievementMenu> menuInstances = [];
     }
 }
