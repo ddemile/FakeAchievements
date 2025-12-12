@@ -8,7 +8,7 @@ namespace FakeAchievements
     public class Plugin : BaseUnityPlugin
     {
         internal const string MOD_ID = "ddemile.fake_achievements";
-        internal const string MOD_VERSION = "0.1.3";
+        internal const string MOD_VERSION = "0.1.4";
 
         public static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource("FakeAchievements");
 

@@ -87,7 +87,7 @@ namespace FakeAchievements
 
             Texture2D texture = LoadTexture(filePath);
 
-            FAtlas atlas = new FAtlas(name, texture, FAtlasManager._nextAtlasIndex++, false); new FAtlas(name, texture, FAtlasManager._nextAtlasIndex++, false);
+            FAtlas atlas = new FAtlas(name, texture, FAtlasManager._nextAtlasIndex++, false);
 
             atlasManager.AddAtlas(atlas);
 
