@@ -1,6 +1,7 @@
 ﻿global using static FakeAchievements.MyDevConsole;
 using BepInEx;
 using BepInEx.Logging;
+using FakeAchievements.Enums;
 
 namespace FakeAchievements
 {
@@ -8,7 +9,7 @@ namespace FakeAchievements
     public class Plugin : BaseUnityPlugin
     {
         internal const string MOD_ID = "ddemile.fake_achievements";
-        internal const string MOD_VERSION = "0.1.3";
+        internal const string MOD_VERSION = "0.1.5";
 
         public static ManualLogSource log = BepInEx.Logging.Logger.CreateLogSource("FakeAchievements");
 
@@ -30,6 +31,9 @@ namespace FakeAchievements
             On.RainWorld.OnModsInit += Extras.WrapInit(LoadResources);
             On.RainWorld.PostModsInit += OnPostModsInit;
 
+            ProcessIDs.RegisterValues();
+            SoundIDs.RegisterValues();
+
             // Put your custom hooks here!
             Hooks.Hooks.Register();
         }
@@ -37,6 +41,9 @@ namespace FakeAchievements
         public void OnDisable()
         {
             AchievementsTracker.SaveUnlockedAchievements();
+
+            ProcessIDs.UnregisterValues();
+            SoundIDs.UnregisterValues();
         }
 
         // Load any resources, such as sprites or sounds
@@ -44,7 +51,6 @@ namespace FakeAchievements
         {
             Futile.atlasManager.LoadImage("illustrations/achievement_background");
 
-            Sounds.Initialize();
             AchievementsManager.LoadAchievements();
 
             AchievementsTracker.LoadUnlockedAchievements();

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FakeAchievements.Hooks
+﻿namespace FakeAchievements.Hooks
 {
     internal static class Hooks
     {
@@ -16,10 +10,8 @@ namespace FakeAchievements.Hooks
         private static void MainLoopProcess_GrafUpdate(On.MainLoopProcess.orig_GrafUpdate orig, MainLoopProcess self, float timeStacker)
         {
             orig(self, timeStacker);
-            foreach (AchievementMenu instance in AchievementsManager.menuInstances)
-            {
-                instance.GrafUpdate(timeStacker);
-            }
+
+            AchievementMenu.UpdateInstances(timeStacker);
         }
     }
 }
