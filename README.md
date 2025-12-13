@@ -16,7 +16,7 @@ To create an achievement follow these steps:
 ## Displaying achievemnents
 
 - Use `achievements grant [cosmeticOnly: bool = false]` command in the DevConsole mod console (for debbuging)
-- Use `AchievementsManager.GrantAchievement("your_achievement_id", [bool cosmeticOnly = false])` in your mod code to display the achievement
+- Use `AchievementsManager.GrantAchievement("your_achievement_id", [bool cosmeticOnly = false])` in your mod's code to display the achievement
 
 Note achievements are by default only ever displayed once; To allow an achievement to be displayed again:
 
