@@ -98,6 +98,7 @@ namespace FakeAchievements
                     ConsoleWrite($"Loaded achievements:{Environment.NewLine}{string.Join(Environment.NewLine, AchievementsManager.achievements.ConvertAll(static achievement => $"- {achievement.FullId}{(AchievementsTracker.UnlockedAchievements.Contains(achievement.FullId) ? " [UNLOCKED]" : "")}"))}");
                     break;
                 case "reload":
+                    AchievementMenu.ClearInstances();
                     AchievementsManager.LoadAchievements();
                     break;
                 case "grant":
