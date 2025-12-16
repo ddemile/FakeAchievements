@@ -8,7 +8,7 @@ To create an achievement follow these steps:
 
 1. Install the FakeAchievements mod
 2. Download and add the [stripped dll](https://github.com/ddemile/FakeAchievements/releases/download/0.1.4-beta/Stripped-FakeAchievements.dll) to your project's referenced assemblies and add the mod as a dependency of your mod
-3. Create an `achievements` folder in your mod root
+3. Create an `achievements` folder in your mod's root
 4. Create a new folder in that folder named after you achievement id
 5. Add a file named `image.png` in the folder (this will be your achievement icon)
 6. And another file named `langs.json`, this file will contain your achievement translations

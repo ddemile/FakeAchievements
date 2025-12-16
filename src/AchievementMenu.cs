@@ -108,12 +108,7 @@ namespace FakeAchievements
                     {
                         if (!initialized)
                         {
-                            foreach (AchievementMenu slot in activeSlots)
-                            {
-                                if (slot == this || !slot.initialized) continue;
-
-                                slot.UpdateSlotIndex(activeSlots.IndexOf(slot) + 1);
-                            }
+                            SortInstances();
 
                             PlaySound(SoundIDs.STEAM_ACHIEVEMENT);
                             initialized = true;
@@ -188,14 +183,30 @@ namespace FakeAchievements
 
             achievementTitle.RemoveSprites();
             achievementSubTitle.RemoveSprites();
+        }
 
-            if (activeSlots.Count == 0) return;
-
-            foreach (AchievementMenu slot in activeSlots)
+        private void SortInstances()
+        {
+            activeSlots.Sort(static (x, y) =>
             {
-                if (slot.delayBeforeVisible > 0f) continue;
+                if (x.initialized && y.initialized)
+                {
+                    return x.shownTime - y.shownTime;
+                }
 
-                slot.UpdateSlotIndex(activeSlots.IndexOf(slot) + 1);
+                int xSlot = x.initialized ? x.slotIndex : -1;
+                int ySlot = y.initialized ? y.slotIndex : -1;
+
+                return xSlot - ySlot;
+            });
+
+            for (int i = 0; i < activeSlots.Count; i++)
+            {
+                AchievementMenu slot = activeSlots[i];
+
+                if (slot == this || !slot.initialized) continue;
+
+                slot.UpdateSlotIndex(i + 1);
             }
         }
 
@@ -235,11 +246,11 @@ namespace FakeAchievements
 
             if (activeSlots.Count > 0)
             {
-                foreach (var slot in activeSlots)
+                for (int i = activeSlots.Count - 1; i >= 0; i--)
                 {
                     try
                     {
-                        slot.Destroy();
+                        activeSlots[i].Destroy();
                     }
                     catch (Exception ex)
                     {
@@ -268,7 +279,7 @@ namespace FakeAchievements
 
                 AchievementMenu instance = new(Plugin.RW.processManager, achievement)
                 {
-                    delayBeforeVisible = delay,
+                    delayBeforeVisible = delay
                 };
 
                 activeSlots.Insert(0, instance);
