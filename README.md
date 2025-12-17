@@ -15,12 +15,12 @@ To create an achievement follow these steps:
 
 ## Displaying achievemnents
 
-- Use `achievements grant [achievementID] [float delay = 0] [bool cosmeticOnly = false]` command in the DevConsole mod console (for debbuging)
-- Use `AchievementsManager.GrantAchievement("your_achievement_id", [delay: 0f, cosmeticOnly: false])` in your mod's code to display the achievement
+- Use `achievements grant [achievement_id] [float delay = 0] [bool cosmeticOnly = false]` command in the DevConsole mod console (for debbuging)
+- Use `AchievementsManager.GrantAchievement("your_achievement_id", [delay: 0f], [cosmeticOnly: false])` in your mod's code to display the achievement
 
 Note achievements are by default only ever displayed once; To allow an achievement to be displayed again:
 
-- Use `achievements revoke [achievementID]` command in the DevConsole's mod console (for debugging)
+- Use `achievements revoke [achievement_id]` command in the DevConsole's mod console (for debugging)
 - Use `AchievementsManager.RevokeAchievement("your_achievement_id")` in your mod's code to allow the achievement to be "unlocked" and displayed again
 
 ## Examples
