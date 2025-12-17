@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using DevConsole.Commands;
 using System;
+using System.Globalization;
 using UnityEngine;
 
 namespace FakeAchievements
@@ -8,46 +9,59 @@ namespace FakeAchievements
     internal static class MyDevConsole
     {
         public static ManualLogSource logSource = BepInEx.Logging.Logger.CreateLogSource("FakeAchievements:ConsoleWrite");
-        public static RainWorld RW => UnityEngine.Object.FindObjectOfType<RainWorld>();
 
         // Register Commands
         internal static void RegisterCommands()
         {
             new CommandBuilder("achievements")
-                .Run(args =>
+                .Run(static args =>
                 {
                     try
                     {
                         RunCommand(args);
                     }
-                    catch (Exception e) { ConsoleWrite("Error in command", Color.red); Plugin.LogError(e); }
+                    catch (Exception e)
+                    {
+                        ConsoleWrite("Error in command", Color.red);
+                        Plugin.LogError(e);
+                    }
                 })
-                .AutoComplete(x =>
+                .AutoComplete(static x =>
                 {
-                    if (x.Length == 0)
+                    switch (x.Length)
                     {
-                        return ["reload", "grant", "revoke"];
-                    }
-                    else if (x.Length == 1)
-                    {
-                        if (x[0] == "grant")
-                        {
-                            return AchievementsManager.achievements.ConvertAll(achievement => $"{achievement.modId}/{achievement.id}");
-                        }
-                        else if (x[0] == "revoke")
-                        {
-                            return AchievementsTracker.UnlockedAchievements;
-                        }
-                    }
-                    else if (x.Length == 2)
-                    { 
-                        if (x[0] == "grant")
-                        {
-                            return ["help-cosmecticOnly: Boolean = False", "True", "False"];
-                        }
+                        case 0:
+                            return ["list", "reload", "grant", "revoke"];
+                        case 1:
+                            {
+                                if (x[0] == "grant")
+                                {
+                                    return AchievementsManager.achievements.ConvertAll(static achievement => achievement.FullId);
+                                }
+                                else if (x[0] == "revoke")
+                                {
+                                    return AchievementsTracker.UnlockedAchievements;
+                                }
+                                break;
+                            }
+                        case 2:
+                            if (x[0] == "grant")
+                            {
+                                return ["help-delay: float = 0"];
+                            }
+                            break;
+                        case 3:
+                            if (x[0] == "grant")
+                            {
+                                return ["help-cosmecticOnly: Boolean = False", "True", "False"];
+                            }
+                            break;
+                        default:
+                            break;
                     }
                     return [];
                 })
+                .Help("achievements [subcommand] [args? ...]")
                 .Register();
         }
 
@@ -60,20 +74,44 @@ namespace FakeAchievements
                 return;
             }
 
-            switch (args[0])
+            string subcommand = args[0].ToLowerInvariant();
+
+            if (args.Length == 1 && (subcommand == "grant" || subcommand == "revoke"))
             {
+                ConsoleWrite($"Error: Command requires at least one argument", Color.red);
+
+                string usage = subcommand switch
+                {
+                    "grant" => "grant [achievementID: string] [delay: float = 0] [cosmeticOnly: bool = False]",
+                    "revoke" => "revoke [achievementID: string]",
+                    _ => null
+                };
+
+                if (!string.IsNullOrEmpty(usage))
+                    ConsoleWrite($"Usage: achievements {usage}");
+                return;
+            }
+
+            switch (subcommand)
+            {
+                case "list":
+                    ConsoleWrite($"Loaded achievements:{Environment.NewLine}{string.Join(Environment.NewLine, AchievementsManager.achievements.ConvertAll(static achievement => $"- {achievement.FullId}{(AchievementsTracker.UnlockedAchievements.Contains(achievement.FullId) ? " [UNLOCKED]" : "")}"))}");
+                    break;
                 case "reload":
+                    AchievementMenu.ClearInstances();
                     AchievementsManager.LoadAchievements();
                     break;
                 case "grant":
-                    string cosmeticOnlyArg = (args.Length > 2 ? args[2] : null);
-                    bool cosmecticOnly = cosmeticOnlyArg?.ToLower() == "true";
-                    AchievementsManager.GrantAchievement(args[1], cosmecticOnly);
+                    float delay = args.Length > 2 ? float.Parse(args[2].ToLowerInvariant().Replace("f", ""), NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture) : 0f;
+                    bool cosmecticOnly = args.Length > 3 && args[3].ToLowerInvariant() == "true";
+
+                    AchievementsManager.GrantAchievement(args[1], delay, cosmecticOnly);
                     break;
                 case "revoke":
                     AchievementsManager.RevokeAchievement(args[1]);
                     break;
                 default:
+                    ConsoleWrite($"Unknown command: {subcommand}", Color.red);
                     break;
             }
         }
@@ -86,7 +124,8 @@ namespace FakeAchievements
             }
             catch { }
         }
-        public static void ConsoleWrite(string message = "")
+
+        public static void ConsoleWrite(string message)
         {
             try
             {

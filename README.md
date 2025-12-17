@@ -8,19 +8,19 @@ To create an achievement follow these steps:
 
 1. Install the FakeAchievements mod
 2. Download and add the [stripped dll](https://github.com/ddemile/FakeAchievements/releases/download/0.1.4-beta/Stripped-FakeAchievements.dll) to your project's referenced assemblies and add the mod as a dependency of your mod
-3. Create an `achievements` folder in your mod root
+3. Create an `achievements` folder in your mod's root folder
 4. Create a new folder in that folder named after you achievement id
 5. Add a file named `image.png` in the folder (this will be your achievement icon)
 6. And another file named `langs.json`, this file will contain your achievement translations
 
 ## Displaying achievemnents
 
-- Use `achievements grant [cosmeticOnly: bool = false]` command in the DevConsole mod console (for debbuging)
-- Use `AchievementsManager.GrantAchievement("your_achievement_id", [bool cosmeticOnly = false])` in your mod's code to display the achievement
+- Use `achievements grant [achievementID] [float delay = 0] [bool cosmeticOnly = false]` command in the DevConsole mod console (for debbuging)
+- Use `AchievementsManager.GrantAchievement("your_achievement_id", [delay: 0f, cosmeticOnly: false])` in your mod's code to display the achievement
 
 Note achievements are by default only ever displayed once; To allow an achievement to be displayed again:
 
-- Use `achievements revoke` command in the DevConsole's mod console (for debugging)
+- Use `achievements revoke [achievementID]` command in the DevConsole's mod console (for debugging)
 - Use `AchievementsManager.RevokeAchievement("your_achievement_id")` in your mod's code to allow the achievement to be "unlocked" and displayed again
 
 ## Examples
@@ -79,9 +79,12 @@ namespace YourModNamespace
             AchievementsManager.GrantAchievement("your_achievement_id");
             // Or
             AchievementsManager.GrantAchievement("your_mod_id/your_achievement_id");
-            
+
             // This only displays the achievement without actually marking it as granted
             AchievementsManager.GrantAchievement("your_mod_id/your_achievement_id", true);
+
+            // This displays the achievement after a brief delay of unlocking it
+            AchievementsManager.GrantAchievement("your_mod_id/your_achievement_id", 200);
 
             // This "locks" / "revoke" the achievement, allowing it to be unlocked again
             AchievementsManager.RevokeAchievement("your_achievement_id");

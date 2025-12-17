@@ -3,7 +3,7 @@
 	"name": "Fake Achievements",
 	"version": "0.1.4",
 	"authors": "ddemile",
-	"description": "A mod to display steam-like achievements.",
+	"description": "A mod to display Steam-like achievements.",
 	"requirements": [ ],
 	"requirements_names": [ ],
 	"tags": [ "Dependency", "Tools" ]

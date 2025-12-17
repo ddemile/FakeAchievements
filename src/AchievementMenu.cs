@@ -1,43 +1,52 @@
-﻿using Menu;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using FakeAchievements.Enums;
+using Menu;
 using UnityEngine;
+using AchievementRequest = (FakeAchievements.Achievement Achievement, float Delay);
 
 namespace FakeAchievements
 {
     public class AchievementMenu : Menu.Menu
     {
-        public MenuLabel achievementTitle;
-        public MenuLabel achievementSubTitle;
-
-        public State state = State.Appearing;
-
-        public const float speedFactor = 1.5f;
-
-        public int shownTime = 0;
-
         public enum State
         {
             Appearing,
-            Showed,
+            Shown,
             Disappearing,
             Hidden
         }
 
-        public AchievementMenu(ProcessManager manager, Achievement achievement) : base(manager, new ProcessManager.ProcessID("FakeAchievementMenu", true))
+        private const float SpeedFactor = 1.5f;
+        private const int MaxDisplayedAchievements = 3;
+
+        private static readonly List<AchievementRequest> displayRequests = [];
+        private static readonly List<AchievementMenu> activeSlots = [];
+
+        private readonly MenuLabel achievementTitle;
+        private readonly MenuLabel achievementSubTitle;
+
+        private readonly List<FNode> childNodes = [];
+
+        private State state = State.Appearing;
+        private int shownTime;
+
+        private float delayBeforeVisible;
+        private bool initialized;
+
+        private int slotIndex = 1;
+        private int yFactor;
+
+        private float? moveTowardsY;
+
+        public AchievementMenu(ProcessManager manager, Achievement achievement) : base(manager, ProcessIDs.FakeAchievementMenu)
         {
             pages.Add(new Page(this, null, "main", 0));
-            PlaySound(Sounds.STEAM_ACHIEVEMENT);
 
-            container.y = -69;
             container.x = Plugin.RW.options.ScreenSize.x - (282 - 1);
+            container.y = -69;
 
-            container.AddChild(
+            childNodes.AddRange([
                 new FSprite("illustrations/achievement_background")
                 {
                     x = 0,
@@ -46,23 +55,24 @@ namespace FakeAchievements
                     height = 69,
                     anchorX = 0,
                     anchorY = 0,
-                }
-            );
-
-            container.AddChild(
-                new FSprite(achievement.imageName)
+                },
+                new FSprite(achievement.ImageName)
                 {
-                    y = 13,
                     x = 11,
+                    y = 13,
                     width = 44,
                     height = 44,
                     anchorX = 0,
                     anchorY = 0,
                 }
-            );
+            ]);
 
-            achievementTitle = new MenuLabel(this, pages[0], achievement.title, new Vector2(70, 36), new Vector2(200, 10), false);
-            achievementSubTitle = new MenuLabel(this, pages[0], achievement.description, new Vector2(70, 20 + 15), new Vector2(200, 10), false);
+            container.AddChild(childNodes[0]);
+            container.AddChild(childNodes[1]);
+
+            achievementTitle = new MenuLabel(this, pages[0], achievement.Title, new Vector2(70, 36), new Vector2(200, 10), false);
+            achievementSubTitle = new MenuLabel(this, pages[0], achievement.Description, new Vector2(70, 20 + 15), new Vector2(200, 10), false);
+
             achievementSubTitle.label.color = Color.gray;
 
             achievementTitle.label.alignment = FLabelAlignment.Left;
@@ -77,6 +87,12 @@ namespace FakeAchievements
 
         public override void GrafUpdate(float timeStacker)
         {
+            if (delayBeforeVisible > 0f)
+            {
+                delayBeforeVisible = Mathf.Max(delayBeforeVisible - timeStacker, 0f);
+                return;
+            }
+
             if (achievementTitle != null && achievementSubTitle != null)
             {
                 achievementTitle.label.x = achievementTitle.DrawX(timeStacker);
@@ -86,36 +102,190 @@ namespace FakeAchievements
                 achievementSubTitle.label.y = achievementSubTitle.DrawY(timeStacker);
             }
 
-            if (state == State.Disappearing)
+            switch (state)
             {
-                this.container.y -= speedFactor;
-            }
-            else if (shownTime >= 1000)
-            {
-                this.state = State.Disappearing;
-            }
-            else if (state == State.Showed)
-            {
-                shownTime++;
-            }
-            else if (container.y >= 0)
-            {
-                this.container.y = 0;
-                this.state = State.Showed;
-            }
-            else if (state == State.Appearing)
-            {
-                this.container.y += speedFactor;
-            }
-            else if (container.y <= -69)
-            {
-                this.container.y = -69;
-                this.state = State.Hidden;
-                AchievementsManager.menuInstances.Remove(this);
+                case State.Appearing:
+                    {
+                        if (!initialized)
+                        {
+                            SortInstances();
+
+                            PlaySound(SoundIDs.STEAM_ACHIEVEMENT);
+                            initialized = true;
+                        }
+
+                        container.y += SpeedFactor;
+
+                        if (container.y >= yFactor) // goalHeight
+                        {
+                            container.y = yFactor;
+                            state = State.Shown;
+                        }
+                    }
+                    break;
+                case State.Shown:
+                    {
+                        shownTime++;
+
+                        if (shownTime >= 1000)
+                            state = State.Disappearing;
+                    }
+                    break;
+                case State.Disappearing:
+                    {
+                        container.y -= SpeedFactor;
+
+                        int disappearHeight = -69 + yFactor;
+                        if (container.y <= disappearHeight)
+                        {
+                            container.y = disappearHeight;
+                            state = State.Hidden;
+
+                            Destroy();
+                        }
+                    }
+                    break;
+                case State.Hidden:
+                default:
+                    break;
             }
 
-            this.container.MoveToFront();
-            this.pages[0].GrafUpdate(timeStacker);
+            if (moveTowardsY is not null)
+            {
+                container.y = Mathf.MoveTowards(container.y, moveTowardsY.Value, SpeedFactor);
+
+                if (container.y >= moveTowardsY.Value)
+                {
+                    container.y = moveTowardsY.Value;
+                    moveTowardsY = null;
+                }
+            }
+
+            container.MoveToFront();
+            pages[0].GrafUpdate(timeStacker);
+        }
+
+        public void Destroy()
+        {
+            if (!activeSlots.Remove(this))
+            {
+                Plugin.Log("WARNING: Menu instance destroyed but not found in active instances!");
+            }
+
+            Plugin.Log("Destroying achievement menu!");
+
+            foreach (FNode node in childNodes)
+            {
+                container.RemoveChild(node);
+            }
+
+            childNodes.Clear();
+
+            achievementTitle.RemoveSprites();
+            achievementSubTitle.RemoveSprites();
+        }
+
+        private void SortInstances()
+        {
+            activeSlots.Sort(static (x, y) =>
+            {
+                if (x.initialized && y.initialized)
+                {
+                    return x.shownTime - y.shownTime;
+                }
+
+                int xSlot = x.initialized ? x.slotIndex : -1;
+                int ySlot = y.initialized ? y.slotIndex : -1;
+
+                return xSlot - ySlot;
+            });
+
+            for (int i = 0; i < activeSlots.Count; i++)
+            {
+                AchievementMenu slot = activeSlots[i];
+
+                if (slot == this || !slot.initialized) continue;
+
+                slot.UpdateSlotIndex(i + 1);
+            }
+        }
+
+        private void UpdateSlotIndex(int newIndex)
+        {
+            int previousIndex = slotIndex;
+
+            slotIndex = newIndex;
+            yFactor = 69 * (newIndex - 1);
+
+            container.sortZ = newIndex;
+
+            moveTowardsY = previousIndex > newIndex
+                ? container.y - (69 * (previousIndex - newIndex))
+                : container.y + (69 * (newIndex - previousIndex));
+
+            foreach (FNode node in childNodes)
+            {
+                node.sortZ = newIndex;
+            }
+
+            achievementTitle.label.sortZ = newIndex;
+            achievementSubTitle.label.sortZ = newIndex;
+        }
+
+        public static void RequestMenu(Achievement achievement, float delay = 0f)
+        {
+            if (float.IsNaN(delay) || float.IsInfinity(delay))
+                delay = 0f;
+
+            displayRequests.Add(new AchievementRequest(achievement, delay));
+        }
+
+        internal static void ClearInstances()
+        {
+            displayRequests.Clear();
+
+            if (activeSlots.Count > 0)
+            {
+                for (int i = activeSlots.Count - 1; i >= 0; i--)
+                {
+                    try
+                    {
+                        activeSlots[i].Destroy();
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.LogError("Failed to destroy menu instance with ClearInstances()!");
+                        Plugin.LogError(ex);
+                    }
+                }
+            }
+
+            activeSlots.Clear();
+        }
+
+        internal static void UpdateInstances(float timeStacker)
+        {
+            if (activeSlots.Count > 0)
+            {
+                for (int i = activeSlots.Count - 1; i >= 0; i--)
+                {
+                    activeSlots[i].GrafUpdate(timeStacker);
+                }
+            }
+
+            if (activeSlots.Count < MaxDisplayedAchievements && displayRequests.Count > 0)
+            {
+                (Achievement achievement, float delay) = displayRequests[0];
+
+                AchievementMenu instance = new(Plugin.RW.processManager, achievement)
+                {
+                    delayBeforeVisible = delay
+                };
+
+                activeSlots.Insert(0, instance);
+
+                displayRequests.RemoveAt(0);
+            }
         }
     }
 }

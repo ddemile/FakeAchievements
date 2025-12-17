@@ -67,6 +67,9 @@ namespace FakeAchievements
         /// </returns>
         public static bool LockAchievement(string achievementID)
         {
+            if (string.IsNullOrEmpty(achievementID))
+                throw new ArgumentException("Achievement ID cannot be empty or null.", nameof(achievementID));
+
             if (!_unlockedAchievements.Contains(achievementID)) return false;
 
             Plugin.Log($"Locking achievement: {achievementID}");
@@ -82,6 +85,9 @@ namespace FakeAchievements
         /// <returns><c>true</c> if the achievement has been successfully unlocked, <c>false</c> otherwise.</returns>
         public static bool UnlockAchievement(string achievementID, bool forceUnlock = false)
         {
+            if (string.IsNullOrEmpty(achievementID))
+                throw new ArgumentException("Achievement ID cannot be empty or null.", nameof(achievementID));
+
             if (!forceUnlock && !CanUnlockAchievement(achievementID)) return false;
 
             Plugin.Log($"Unlocking achievement: {achievementID}");
@@ -107,9 +113,10 @@ namespace FakeAchievements
 
                 // As of right now, the version can be ignored. What we actually need is the list of IDs that come afterwards.
 
-                if (rawData.Length < 2) throw new Exception("Corrupted file");
+                if (rawData.Length < 2)
+                    throw new InvalidDataException("Save file is corrupted; Cannot retrieve unlocked achievements.");
 
-                _unlockedAchievements.AddRange(rawData[1].Split(','));
+                _unlockedAchievements.AddRange(rawData[1].Split([','], StringSplitOptions.RemoveEmptyEntries));
 
                 Plugin.Log($"Loaded {_unlockedAchievements.Count} unlocked achievement(s).");
             }

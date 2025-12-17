@@ -1,40 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FakeAchievements
 {
     public class Achievement
     {
-        public string id;
-        public Dictionary<string, Dictionary<string, string>> translations;
-        public string imagePath;
-        public string modId;
+        private readonly Dictionary<string, Dictionary<string, string>> translations;
+        private readonly string imagePath;
 
-        private string GetLocalization(string localization)
-        {
-            var transformedTranslations = translations.ToDictionary(x => x.Key.ToLower(), x => x.Value);
-            string lang = Plugin.RW.options.language.value.ToLower();
-            if (transformedTranslations.ContainsKey(lang)) return transformedTranslations[lang][localization];
-            return transformedTranslations["english"][localization];
-        }
+        public string Id { get; }
+        public string ModId { get; }
 
-        public string title => GetLocalization("title");
-        public string description => GetLocalization("description");
-        public string imageName => $"{modId}/achievements/{id}";
+        public string FullId => $"{ModId}/{Id}";
+
+        public string Title => GetLocalization("title");
+        public string Description => GetLocalization("description");
+        public string ImageName => $"{ModId}/achievements/{Id}";
 
         public Achievement(string id, string modId, Dictionary<string, Dictionary<string, string>> localizations)
         {
-            this.id = id;
-            this.modId = modId;
-            this.translations = localizations;
+            Id = id;
+            ModId = modId;
+            translations = localizations.ToDictionary(static x => x.Key.ToLower(), static x => x.Value);
 
-            imagePath = Path.Combine("achievements", this.id, "image.png");
-            Futile.atlasManager.UnloadImage(imageName);
-            Utils.LoadImage(imageName, imagePath, modId);
+            imagePath = Path.Combine("achievements", Id, "image.png");
+            Futile.atlasManager.UnloadImage(ImageName);
+            Utils.LoadImage(ImageName, imagePath, modId);
+        }
+
+        private string GetLocalization(string localization)
+        {
+            string lang = Plugin.RW.options.language.value.ToLower();
+
+            return translations.TryGetValue(lang, out Dictionary<string, string> translation)
+                ? translation[localization]
+                : translations["english"][localization];
         }
     }
 }

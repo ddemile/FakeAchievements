@@ -1,12 +1,8 @@
 ﻿using RWCustom;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FakeAchievements
 {
@@ -21,7 +17,7 @@ namespace FakeAchievements
                 string text2 = "";
                 if (array[i].Length != 0)
                 {
-                    string[] array2 = array[i].Split(new char[] { ' ' });
+                    string[] array2 = array[i].Split([' ']);
                     if (array2.Length > 1)
                     {
                         for (int j = 0; j < array2.Length; j++)

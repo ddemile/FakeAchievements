@@ -1,28 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
 namespace FakeAchievements
 {
     public class AchievementsManager
     {
-        public const float speedFactor = 1.5f;
-
         public static List<Achievement> achievements;
 
         public static void LoadAchievements()
         {
             Plugin.Log("Loading achievements");
 
-            List<ModManager.Mod> mods = (from mod in ModManager.InstalledMods where mod.enabled select mod).ToList();
-
             achievements = [];
 
-            foreach (ModManager.Mod mod in mods)
+            foreach (ModManager.Mod mod in ModManager.ActiveMods)
             {
                 string achievementsPath = Path.Combine(mod.path, "achievements");
+
                 if (!Directory.Exists(achievementsPath)) continue;
 
                 string[] directories = Directory.GetDirectories(achievementsPath);
@@ -32,7 +29,7 @@ namespace FakeAchievements
                     string achievementId = new DirectoryInfo(directory).Name;
                     string achievementPath = Path.Combine(achievementsPath, achievementId);
 
-                    Plugin.Log("Found achievement: " + achievementId + " | " + achievementPath);
+                    Plugin.Log("Found achievement: " + achievementId + " | " + achievementPath.Replace(mod.path, mod.name));
 
                     string oldLangsFile = Path.Combine(achievementPath, "info.json");
 
@@ -48,28 +45,30 @@ namespace FakeAchievements
 
         public static Achievement ResolveAchievement(string achievementResolvable)
         {
-            return achievements.Find(achievement => $"{achievement.modId}/{achievement.id}" == achievementResolvable || achievement.id == achievementResolvable);
+            return achievements.Find(achievement => achievement.Id == achievementResolvable || achievement.FullId == achievementResolvable);
         }
 
         [Obsolete("This method was replaced by the new GrantAchievement method")]
         public static void ShowAchievement(string achievementResolvable)
         {
-            GrantAchievement(achievementResolvable, true);
+            GrantAchievement(achievementResolvable, 0f, true);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GrantAchievement(string achievementResolvable, bool cosmeticOnly = false)
         {
-            Achievement achievement = ResolveAchievement(achievementResolvable) ?? throw new Exception($"Achievement not found: {achievementResolvable}");
+            GrantAchievement(achievementResolvable, 0f, cosmeticOnly);
+        }
 
-            string achievementId = $"{achievement.modId}/{achievement.id}";
+        public static void GrantAchievement(string achievementResolvable, float delay, bool cosmeticOnly = false)
+        {
+            Achievement achievement = ResolveAchievement(achievementResolvable) ?? throw new ArgumentException($"Achievement not found: {achievementResolvable}", nameof(achievementResolvable));
 
-            if (cosmeticOnly || AchievementsTracker.UnlockAchievement(achievementId))
+            if (cosmeticOnly || AchievementsTracker.UnlockAchievement(achievement.FullId))
             {
-                Plugin.Log($"Displaying achievement: {achievementId}");
+                Plugin.Log($"Displaying achievement: {achievement.FullId}");
 
-                menuInstances.Add(
-                    new AchievementMenu(Plugin.RW.processManager, achievement)
-                );
+                AchievementMenu.RequestMenu(achievement, delay);
             }
         }
 
@@ -77,14 +76,15 @@ namespace FakeAchievements
         {
             Achievement achievement = ResolveAchievement(achievementResolvable);
 
-            string achievementId = achievement != null ? $"{achievement.modId}/{achievement.id}" : achievementResolvable;
+            string achievementId = achievement != null ? achievement.FullId : achievementResolvable;
 
             if (!AchievementsTracker.LockAchievement(achievementId))
             {
-                throw new Exception($"Couldn't revoke achievement: {achievementId}");
+                throw new InvalidOperationException($"Couldn't revoke achievement: {achievementId}");
             }
         }
 
+        [Obsolete("This field was replaced by AchievementMenu's new activeInstance and waitingInstances fields.")]
         public static List<AchievementMenu> menuInstances = [];
     }
 }
