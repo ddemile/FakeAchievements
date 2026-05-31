@@ -51,9 +51,11 @@ namespace FakeAchievements
         {
             Futile.atlasManager.LoadImage("illustrations/achievement_background");
 
+            AchievementsTracker.LoadUnlockedAchievements();
+            
             AchievementsManager.LoadAchievements();
 
-            AchievementsTracker.LoadUnlockedAchievements();
+            Bundle.Load();
         }
 
         private void OnPostModsInit(On.RainWorld.orig_PostModsInit orig, RainWorld self)

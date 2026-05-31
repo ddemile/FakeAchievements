@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -16,17 +17,33 @@ namespace FakeAchievements
 
         public string Title => GetLocalization("title");
         public string Description => GetLocalization("description");
-        public string ImageName => $"{ModId}/achievements/{Id}";
+        public bool Achieved => AchievementsTracker.UnlockedAchievements.Contains(FullId);
+        private string BaseImageName => $"{ModId}/achievements/{Id}";
+        private string LockedImageName => $"{BaseImageName}/locked";
+        public string ImageName => (HasLockedImage && !Achieved) ? LockedImageName : BaseImageName;
 
-        public Achievement(string id, string modId, Dictionary<string, Dictionary<string, string>> localizations)
+        public bool Hidden { get; }
+        public bool HasLockedImage { get; }
+
+        public Achievement(string id, string modId, Dictionary<string, Dictionary<string, string>> localizations, bool hidden = false, bool hasLockedImage = false)
         {
             Id = id;
             ModId = modId;
             translations = localizations.ToDictionary(static x => x.Key.ToLower(), static x => x.Value);
+            Hidden = hidden;
+            HasLockedImage = hasLockedImage;
 
             imagePath = Path.Combine("achievements", Id, "image.png");
-            Futile.atlasManager.UnloadImage(ImageName);
-            Utils.LoadImage(ImageName, imagePath, modId);
+            Futile.atlasManager.UnloadImage(BaseImageName);
+            Utils.LoadImage(BaseImageName, imagePath, modId);
+
+            Futile.atlasManager.UnloadImage(LockedImageName);
+            if (hasLockedImage)
+            {
+                string lockedImagePath = Path.Combine("achievements", Id, "image_locked.png");
+
+                Utils.LoadImage(LockedImageName, lockedImagePath, modId);
+            }
         }
 
         private string GetLocalization(string localization)

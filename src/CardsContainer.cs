@@ -11,14 +11,13 @@ using UnityEngine;
 
 namespace FakeAchievements;
 
-internal class CardsContainer : RectangularMenuObject, Slider.ISliderOwner
+internal class CardsContainer : RectangularMenuObject
 {
     internal static Vector2 CAM_POS = new(10000f, -10000f);
 
     private Camera cam;
     private FTexture insideTexture;
     private RenderTexture renderTexture;
-    public float scrollOffset;
     private RoundedRect rectBack;
     private SliderController sliderController;
     private VerticalSlider slider;
@@ -63,6 +62,13 @@ internal class CardsContainer : RectangularMenuObject, Slider.ISliderOwner
     public void AddCard(AchievementCard card)
     {
         subObjects.Add(card);
+    }
+
+    public void Reset()
+    {
+        subObjects.RemoveAll(obj => obj is AchievementCard);
+        myContainer.SetPosition(CAM_POS);
+        sliderController.Value = 1;
     }
 
     void MoveCam()
@@ -124,15 +130,5 @@ internal class CardsContainer : RectangularMenuObject, Slider.ISliderOwner
         UnityEngine.Object.Destroy(cam.gameObject);
         owner.RemoveSubObject(sliderController);
         base.RemoveSprites();
-    }
-
-    float Slider.ISliderOwner.ValueOfSlider(Slider slider)
-    {
-        return 1;
-    }
-
-    void Slider.ISliderOwner.SliderSetValue(Slider slider, float setValue)
-    {
-        return;
     }
 }

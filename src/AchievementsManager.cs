@@ -36,7 +36,22 @@ namespace FakeAchievements
                     string langsFile = File.Exists(oldLangsFile) ? oldLangsFile : Path.Combine(achievementPath, "langs.json");
                     var localizations = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(File.ReadAllText(langsFile));
 
-                    Achievement achievement = new Achievement(achievementId, mod.id, localizations);
+                    bool hidden = false;
+
+                    string propertiesFile = Path.Combine(achievementPath, "properties.json");
+                    if (File.Exists(propertiesFile))
+                    {
+                        var properties = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(propertiesFile));
+
+                        if (properties.TryGetValue("hidden", out object hiddenObj) && hiddenObj is bool hiddenValue)
+                        {
+                            hidden = hiddenValue;
+                        }
+                    }
+
+                    bool hasLockedImage = File.Exists(Path.Combine(achievementPath, "image_locked.png"));
+
+                    Achievement achievement = new Achievement(achievementId, mod.id, localizations, hidden, hasLockedImage);
 
                     achievements.Add(achievement);
                 }
@@ -60,7 +75,7 @@ namespace FakeAchievements
             GrantAchievement(achievementResolvable, 0f, cosmeticOnly);
         }
 
-        public static void GrantAchievement(string achievementResolvable, float delay, bool cosmeticOnly = false)
+        public static bool GrantAchievement(string achievementResolvable, float delay, bool cosmeticOnly = false)
         {
             Achievement achievement = ResolveAchievement(achievementResolvable) ?? throw new ArgumentException($"Achievement not found: {achievementResolvable}", nameof(achievementResolvable));
 
@@ -69,19 +84,19 @@ namespace FakeAchievements
                 Plugin.Log($"Displaying achievement: {achievement.FullId}");
 
                 AchievementOverlay.RequestMenu(achievement, delay);
+
+                return true;
             }
+            return false;
         }
 
-        public static void RevokeAchievement(string achievementResolvable)
+        public static bool RevokeAchievement(string achievementResolvable)
         {
             Achievement achievement = ResolveAchievement(achievementResolvable);
 
             string achievementId = achievement != null ? achievement.FullId : achievementResolvable;
 
-            if (!AchievementsTracker.LockAchievement(achievementId))
-            {
-                throw new InvalidOperationException($"Couldn't revoke achievement: {achievementId}");
-            }
+            return AchievementsTracker.LockAchievement(achievementId);
         }
 
         [Obsolete("This field was replaced by AchievementMenu's new activeInstance and waitingInstances fields.")]

@@ -28,8 +28,6 @@ namespace FakeAchievements
 
         public override void Update()
         {
-            if (!IsVisible) return;
-
             base.Update();
         }
 

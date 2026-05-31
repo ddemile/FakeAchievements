@@ -1,0 +1,10 @@
+{
+    "english": {
+        "title": "Hidden achievement example",
+        "description": "Achievement description"
+    },
+    "french": {
+        "title": "Exemple de succés caché",
+        "description": "Description du succés"
+    }
+}
