@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FakeAchievements
@@ -32,8 +33,21 @@ namespace FakeAchievements
 
                 bool hidden = SteamUserStats.GetAchievementDisplayAttribute(
                     apiName, "hidden") == "1";
-
+                
                 int icon = SteamUserStats.GetAchievementIcon(apiName);
+                int countdown = 50;
+
+                while (icon == 0)
+                {
+                    if (countdown == 0)
+                    {
+                        throw new Exception($"Failed to fetch the icon of {displayName}");
+                    }
+
+                    icon = SteamUserStats.GetAchievementIcon(apiName);
+                    Thread.Sleep(100);
+                    countdown--;
+                }
 
                 list.Add(new SteamAchievement
                 {

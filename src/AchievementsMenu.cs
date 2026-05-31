@@ -3,6 +3,7 @@ using Menu;
 using RWCustom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 namespace FakeAchievements
@@ -338,7 +339,7 @@ namespace FakeAchievements
             Container.AddChild(title);
             Container.AddChild(subTitle);
         }
-
+        
         public void Hide()
         {
             image.isVisible = false;
