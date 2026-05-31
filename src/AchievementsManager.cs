@@ -68,7 +68,7 @@ namespace FakeAchievements
             {
                 Plugin.Log($"Displaying achievement: {achievement.FullId}");
 
-                AchievementMenu.RequestMenu(achievement, delay);
+                AchievementOverlay.RequestMenu(achievement, delay);
             }
         }
 
@@ -85,6 +85,6 @@ namespace FakeAchievements
         }
 
         [Obsolete("This field was replaced by AchievementMenu's new activeInstance and waitingInstances fields.")]
-        public static List<AchievementMenu> menuInstances = [];
+        public static List<AchievementOverlay> menuInstances = [];
     }
 }

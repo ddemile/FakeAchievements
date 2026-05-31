@@ -7,7 +7,7 @@ using AchievementRequest = (FakeAchievements.Achievement Achievement, float Dela
 
 namespace FakeAchievements
 {
-    public class AchievementMenu : Menu.Menu
+    public class AchievementOverlay : Menu.Menu
     {
         public enum State
         {
@@ -21,7 +21,7 @@ namespace FakeAchievements
         private const int MaxDisplayedAchievements = 3;
 
         private static readonly List<AchievementRequest> displayRequests = [];
-        private static readonly List<AchievementMenu> activeSlots = [];
+        private static readonly List<AchievementOverlay> activeSlots = [];
 
         private readonly MenuLabel achievementTitle;
         private readonly MenuLabel achievementSubTitle;
@@ -39,7 +39,7 @@ namespace FakeAchievements
 
         private float? moveTowardsY;
 
-        public AchievementMenu(ProcessManager manager, Achievement achievement) : base(manager, ProcessIDs.FakeAchievementMenu)
+        public AchievementOverlay(ProcessManager manager, Achievement achievement) : base(manager, ProcessIDs.AchievementOverlay)
         {
             pages.Add(new Page(this, null, "main", 0));
 
@@ -202,7 +202,7 @@ namespace FakeAchievements
 
             for (int i = 0; i < activeSlots.Count; i++)
             {
-                AchievementMenu slot = activeSlots[i];
+                AchievementOverlay slot = activeSlots[i];
 
                 if (slot == this || !slot.initialized) continue;
 
@@ -277,7 +277,7 @@ namespace FakeAchievements
             {
                 (Achievement achievement, float delay) = displayRequests[0];
 
-                AchievementMenu instance = new(Plugin.RW.processManager, achievement)
+                AchievementOverlay instance = new(Plugin.RW.processManager, achievement)
                 {
                     delayBeforeVisible = delay
                 };

@@ -32,6 +32,10 @@
         <Reference Include="..\lib\RainWorldManaged\Mono*.dll" Publicize="true">
             <Private>false</Private>
         </Reference>
+
+        <Reference Include="..\lib\RainWorldManaged\com.rlabrecque.steamworks.net.dll" Publicize="true">
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>

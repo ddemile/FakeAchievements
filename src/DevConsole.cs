@@ -1,6 +1,9 @@
 ﻿using BepInEx.Logging;
 using DevConsole.Commands;
+using RWCustom;
+using Steamworks;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
@@ -82,8 +85,8 @@ namespace FakeAchievements
 
                 string usage = subcommand switch
                 {
-                    "grant" => "grant [achievementID: string] [delay: float = 0] [cosmeticOnly: bool = False]",
-                    "revoke" => "revoke [achievementID: string]",
+                    "grant" => "grant [achievementId: string] [delay: float = 0] [cosmeticOnly: bool = False]",
+                    "revoke" => "revoke [achievementId: string]",
                     _ => null
                 };
 
@@ -98,7 +101,7 @@ namespace FakeAchievements
                     ConsoleWrite($"Loaded achievements:{Environment.NewLine}{string.Join(Environment.NewLine, AchievementsManager.achievements.ConvertAll(static achievement => $"- {achievement.FullId}{(AchievementsTracker.UnlockedAchievements.Contains(achievement.FullId) ? " [UNLOCKED]" : "")}"))}");
                     break;
                 case "reload":
-                    AchievementMenu.ClearInstances();
+                    AchievementOverlay.ClearInstances();
                     AchievementsManager.LoadAchievements();
                     break;
                 case "grant":
@@ -109,6 +112,17 @@ namespace FakeAchievements
                     break;
                 case "revoke":
                     AchievementsManager.RevokeAchievement(args[1]);
+                    break;
+                case "temp":
+                    List<SteamAchievement> achievements = SteamFetcher.FetchAchievements();
+
+                    foreach (SteamAchievement achievement in achievements)
+                    {
+                        ConsoleWrite($"Achievement: {achievement.ApiName} - Achieved: {achievement.Achieved} - Hidden: {achievement.Hidden}");
+                    }
+                    break;
+                case "menu":
+                    Custom.rainWorld.processManager.RequestMainProcessSwitch(Enums.ProcessIDs.AchievementsMenu);
                     break;
                 default:
                     ConsoleWrite($"Unknown command: {subcommand}", Color.red);

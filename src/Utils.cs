@@ -1,8 +1,10 @@
-﻿using RWCustom;
+﻿using Microsoft.Win32;
+using RWCustom;
 using System;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using Steamworks;
 
 namespace FakeAchievements
 {
@@ -90,6 +92,35 @@ namespace FakeAchievements
             return atlas;
         }
 
+        public static FAtlas LoadSteamImage(string name, int imageHandle)
+        {
+            FAtlasManager atlasManager = Futile.atlasManager;
+            if (atlasManager.DoesContainAtlas(name))
+            {
+                return atlasManager.GetAtlasWithName(name);
+            }
+
+            Texture2D texture = SteamImageToTexture2D(imageHandle);
+
+            FAtlas atlas = new FAtlas(name, texture, FAtlasManager._nextAtlasIndex++, false);
+
+            atlasManager.AddAtlas(atlas);
+
+            return atlas;
+        }
+
+        public static void LoadElement(string elementName)
+        {
+            if (Futile.atlasManager.GetAtlasWithName(elementName) != null)
+            {
+                return;
+            }
+            string text = AssetManager.ResolveFilePath("Illustrations" + Path.DirectorySeparatorChar.ToString() + elementName + ".png");
+            Texture2D texture2D = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            AssetManager.SafeWWWLoadTexture(ref texture2D, "file:///" + text, false, true);
+            Futile.atlasManager.LoadAtlasFromTexture(elementName, texture2D, false);
+        }
+
         public static string ResolveFilePath(string path, string modId)
         {
             ModManager.Mod mod = ResolveMod(modId);
@@ -128,6 +159,59 @@ namespace FakeAchievements
         {
             Texture2D texture2D = new Texture2D(1, 1, TextureFormat.ARGB32, false);
             return AssetManager.SafeWWWLoadTexture(ref texture2D, path, false, true);
+        }
+
+        public static Texture2D SteamImageToTexture2D(int imageHandle)
+        {
+            if (imageHandle == 0)
+            {
+                return null;
+            }
+
+            // Icon not loaded yet
+            if (imageHandle == 0)
+                return null;
+
+            bool sizeOk = SteamUtils.GetImageSize(imageHandle, out uint width, out uint height);
+
+            if (!sizeOk || width == 0 || height == 0)
+                return null;
+
+            byte[] imageData = new byte[width * height * 4];
+
+            bool imageOk = SteamUtils.GetImageRGBA(
+                imageHandle,
+                imageData,
+                imageData.Length
+            );
+
+            if (!imageOk)
+                return null;
+
+            FlipVertically(imageData, (int)width, (int)height);
+
+            Texture2D texture = new((int)width, (int)height, TextureFormat.RGBA32, false);
+
+            texture.LoadRawTextureData(imageData);
+            texture.Apply();
+
+            return texture;
+        }
+
+        private static void FlipVertically(byte[] rgba, int width, int height)
+        {
+            int rowSize = width * 4;
+            byte[] temp = new byte[rowSize];
+
+            for (int y = 0; y < height / 2; y++)
+            {
+                int top = y * rowSize;
+                int bottom = (height - y - 1) * rowSize;
+
+                Buffer.BlockCopy(rgba, top, temp, 0, rowSize);
+                Buffer.BlockCopy(rgba, bottom, rgba, top, rowSize);
+                Buffer.BlockCopy(temp, 0, rgba, bottom, rowSize);
+            }
         }
     }
 }
