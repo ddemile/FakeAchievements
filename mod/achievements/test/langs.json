@@ -1,10 +1,10 @@
 {
     "english": {
-        "title": "Test achievement",
+        "title": "Achievement example",
         "description": "Achievement description"
     },
     "french": {
-        "title": "Succés de test",
+        "title": "Exemple de succés",
         "description": "Description du succés"
     }
 }

@@ -1,13 +1,9 @@
 ﻿using FakeAchievements.Enums;
 using Menu;
 using RWCustom;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 namespace FakeAchievements
 {
@@ -22,6 +18,8 @@ namespace FakeAchievements
         readonly List<AchievementCard> customCards = [];
 
         readonly CardsContainer cardsContainer;
+
+        readonly List<FNode> customPageElements = []; 
 
         public AchievementsMenu(ProcessManager manager) : base(manager, ProcessIDs.AchievementsMenu)
         {
@@ -52,6 +50,8 @@ namespace FakeAchievements
                 ) + Vector2.one * PADDING * 2
             );
 
+            Page.subObjects.Add(new SimpleButton(this, Page, "BACK", "BACK", new Vector2(cardsContainer.pos.x, 20), new Vector2(110f, 30f)));
+
             // Init steam achievements
             List<SteamAchievement> steamAchievements = SteamFetcher.FetchAchievements();
 
@@ -71,17 +71,70 @@ namespace FakeAchievements
             // Init custom achievements
             List<Achievement> customAchievements = AchievementsManager.achievements;
 
-            customAchievements.Sort((a, b) => (b.Achieved ? 2 : b.Hidden ? 0 : 1) - (a.Achieved ? 2 : a.Hidden ? 0 : 1));
-
-            for (int i = 0; i < customAchievements.Count; i++)
+            var groupedAchievements = customAchievements.GroupBy(a => a.ModId).ToList();
+            groupedAchievements.Sort((a, b) =>
             {
-                Achievement achievement = customAchievements[i];
+                string nameA = ModManager.ActiveMods.Find(mod => mod.id == a.Key).name;
+                string nameB = ModManager.ActiveMods.Find(mod => mod.id == b.Key).name;
 
-                bool isEven = i % 2 == 0;
+                return nameA.CompareTo(nameB);
+            });
 
-                AchievementCard card = new(achievement, this, cardsContainer, new(cardsContainer.size.x / 2 - (isEven ? AchievementCard.CARD_WIDTH : 0), PADDING + (AchievementCard.SIZE + SPACING) * (i / 2) * -1f));
+            float lastY = 0;
+            float lastCardY = PADDING;
+
+            int lineBottomPadding = 10;
+
+            foreach (var achievementsGroup in groupedAchievements)
+            {
+                ModManager.Mod mod = ModManager.ActiveMods.Find(mod => mod.id == achievementsGroup.Key);
+
+                FLabel modLabel = new(Custom.GetDisplayFont(), mod.name)
+                {
+                    x = cardsContainer.DrawX(1) + cardsContainer.size.x / 2 - AchievementCard.CARD_WIDTH,
+                    y = cardsContainer.DrawY(1) + (AchievementCard.SIZE + SPACING) + lastCardY,
+                    alignment = FLabelAlignment.Left,
+                    anchorX = 0,
+                    anchorY = 1,
+                    isVisible = false
+                };
                 
-                customCards.Add(card);
+                customPageElements.Add(modLabel);
+
+                FSprite line = new("pixel", true)
+                {
+                    x = modLabel.x,
+                    y = modLabel.y - modLabel.textRect.height - 2,
+                    scaleX = AchievementCard.CARD_WIDTH * 2,
+                    scaleY = 2,
+                    color = MenuColorEffect.rgbMediumGrey,
+                    anchorX = 0,
+                    _anchorY = 1,
+                    isVisible = false
+                };
+
+                customPageElements.Add(line);
+
+                lastY = line.y - line.scaleY;
+
+                cardsContainer.myContainer.AddChild(modLabel);
+                cardsContainer.myContainer.AddChild(line);
+
+                List<Achievement> achievements = achievementsGroup.ToList();
+
+                achievements.Sort((a, b) => (b.Achieved ? 2 : b.Hidden ? 0 : 1) - (a.Achieved ? 2 : a.Hidden ? 0 : 1));
+
+                for (int i = 0; i < achievementsGroup.Count(); i++)
+                {
+                    Achievement achievement = achievementsGroup.ElementAt(i);
+
+                    bool isEven = i % 2 == 0;
+
+                    AchievementCard card = new(achievement, this, cardsContainer, new(cardsContainer.size.x / 2 - (isEven ? AchievementCard.CARD_WIDTH : 0), lastY - cardsContainer.DrawY(1) - AchievementCard.SIZE - lineBottomPadding - (AchievementCard.SIZE + SPACING) * (i / 2)));
+                    lastCardY = card.pos.y - AchievementCard.SIZE - PADDING;
+                    
+                    customCards.Add(card);
+                }
             }
 
             UpdateCardsContainer(steamCards);
@@ -113,12 +166,9 @@ namespace FakeAchievements
                 cardsContainer.AddCard(card);
             }
 
-            float startY = cards.First().pos.y + AchievementCard.SIZE;
-            float endY = cards.Last().pos.y;
-
             cardsContainer.myContainer.SetPosition(cardsContainer.myContainer.GetPosition() + new Vector2(0, cardsContainer.size.y - PADDING * 2 - AchievementCard.SIZE));
 
-            cardsContainer.contentSize = startY - endY;
+            cardsContainer.contentSize = -cards.Last().pos.y + AchievementCard.SIZE + PADDING;
         }
 
         public override void Singal(MenuObject sender, string message)
@@ -129,8 +179,12 @@ namespace FakeAchievements
                 {
                     card.Hide();
                 }
+                foreach (FNode node in customPageElements)
+                {
+                    node.isVisible = true;
+                }
                 UpdateCardsContainer(customCards);
-                PlaySound(SoundID.MENU_Switch_Page_In);
+                PlaySound(SoundID.MENU_Button_Standard_Button_Pressed);
             }
             else if (message == "STEAM")
             {
@@ -138,8 +192,15 @@ namespace FakeAchievements
                 {
                     card.Hide();
                 }
+                foreach (FNode node in customPageElements)
+                {
+                    node.isVisible = false;
+                }
                 UpdateCardsContainer(steamCards);
-                PlaySound(SoundID.MENU_Switch_Page_In);
+                PlaySound(SoundID.MENU_Button_Standard_Button_Pressed);
+            } else if (message == "BACK")
+            {
+                OnExit();
             }
 
             base.Singal(sender, message);
