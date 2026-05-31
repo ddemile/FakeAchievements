@@ -120,13 +120,13 @@ namespace FakeAchievements
                 cardsContainer.myContainer.AddChild(modLabel);
                 cardsContainer.myContainer.AddChild(line);
 
-                List<Achievement> achievements = achievementsGroup.ToList();
+                List<Achievement> achievements = achievementsGroup.Where(achievement => achievement.VisibleInMenu).ToList();
 
                 achievements.Sort((a, b) => (b.Achieved ? 2 : b.Hidden ? 0 : 1) - (a.Achieved ? 2 : a.Hidden ? 0 : 1));
 
-                for (int i = 0; i < achievementsGroup.Count(); i++)
+                for (int i = 0; i < achievements.Count; i++)
                 {
-                    Achievement achievement = achievementsGroup.ElementAt(i);
+                    Achievement achievement = achievements[i];
 
                     bool isEven = i % 2 == 0;
 

@@ -37,6 +37,7 @@ namespace FakeAchievements
                     var localizations = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(File.ReadAllText(langsFile));
 
                     bool hidden = false;
+                    bool visibleInMenu = true;
 
                     string propertiesFile = Path.Combine(achievementPath, "properties.json");
                     if (File.Exists(propertiesFile))
@@ -47,11 +48,16 @@ namespace FakeAchievements
                         {
                             hidden = hiddenValue;
                         }
+
+                        if (properties.TryGetValue("visibleInMenu", out object visibleInMenuObj) && visibleInMenuObj is bool visibleInMenuValue)
+                        {
+                            visibleInMenu = visibleInMenuValue;
+                        }
                     }
 
                     bool hasLockedImage = File.Exists(Path.Combine(achievementPath, "image_locked.png"));
 
-                    Achievement achievement = new Achievement(achievementId, mod.id, localizations, hidden, hasLockedImage);
+                    Achievement achievement = new Achievement(achievementId, mod.id, localizations, hidden, visibleInMenu, hasLockedImage);
 
                     achievements.Add(achievement);
                 }

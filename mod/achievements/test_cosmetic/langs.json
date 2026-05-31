@@ -1,0 +1,10 @@
+{
+    "english": {
+        "title": "Cosmetic achievement example",
+        "description": "Achievement description"
+    },
+    "french": {
+        "title": "Exemple de succés cosmétique",
+        "description": "Description du succés"
+    }
+}

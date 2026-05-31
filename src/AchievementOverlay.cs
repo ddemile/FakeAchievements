@@ -56,7 +56,7 @@ namespace FakeAchievements
                     anchorX = 0,
                     anchorY = 0,
                 },
-                new FSprite(achievement.ImageName)
+                new FSprite(achievement.UnlockedImageName)
                 {
                     x = 11,
                     y = 13,

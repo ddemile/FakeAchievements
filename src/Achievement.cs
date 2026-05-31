@@ -18,24 +18,27 @@ namespace FakeAchievements
         public string Title => GetLocalization("title");
         public string Description => GetLocalization("description");
         public bool Achieved => AchievementsTracker.UnlockedAchievements.Contains(FullId);
-        private string BaseImageName => $"{ModId}/achievements/{Id}";
-        private string LockedImageName => $"{BaseImageName}/locked";
-        public string ImageName => (HasLockedImage && !Achieved) ? LockedImageName : BaseImageName;
-
+        public string UnlockedImageName => $"{ModId}/achievements/{Id}";
+        public string LockedImageName => $"{UnlockedImageName}/locked";
+        public string ImageName => (HasLockedImage && !Achieved) ? LockedImageName : UnlockedImageName;
+        
         public bool Hidden { get; }
+        public bool VisibleInMenu { get; }
+
         public bool HasLockedImage { get; }
 
-        public Achievement(string id, string modId, Dictionary<string, Dictionary<string, string>> localizations, bool hidden = false, bool hasLockedImage = false)
+        public Achievement(string id, string modId, Dictionary<string, Dictionary<string, string>> localizations, bool hidden = false, bool visibleInMenu = true, bool hasLockedImage = false)
         {
             Id = id;
             ModId = modId;
             translations = localizations.ToDictionary(static x => x.Key.ToLower(), static x => x.Value);
             Hidden = hidden;
+            VisibleInMenu = visibleInMenu;
             HasLockedImage = hasLockedImage;
 
             imagePath = Path.Combine("achievements", Id, "image.png");
-            Futile.atlasManager.UnloadImage(BaseImageName);
-            Utils.LoadImage(BaseImageName, imagePath, modId);
+            Futile.atlasManager.UnloadImage(UnlockedImageName);
+            Utils.LoadImage(UnlockedImageName, imagePath, modId);
 
             Futile.atlasManager.UnloadImage(LockedImageName);
             if (hasLockedImage)
